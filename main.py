@@ -10,4 +10,3 @@ def import_fx_rates():
 
     db.insert_fx_rates(rates)
     db.close()
-

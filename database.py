@@ -7,6 +7,7 @@ class Database:
         try:
             self.conn = duckdb.connect("fx_rates.db")
 
+            # Create base table
             self.conn.execute("""CREATE TABLE IF NOT EXISTS exchange_rates (
                             date DATE,
                             base VARCHAR,
@@ -14,6 +15,20 @@ class Database:
                             rate DECIMAL(18, 8),
                             PRIMARY KEY (date, base, quote)
                         );""")
+
+            # Create or update cross-rate view
+            self.conn.execute("""
+                            CREATE OR REPLACE VIEW fx_cross_rates AS
+                            SELECT
+                                a.date,
+                                a.quote AS base_currency,
+                                b.quote AS quote_currency,
+                                b.rate / a.rate AS rate
+                            FROM exchange_rates a
+                            JOIN exchange_rates b
+                                ON a.date = b.date
+                            WHERE a.quote <> b.quote;
+                        """)
             
         except duckdb.FatalException as e:
             print(f"Could not connect to database: {e}")
@@ -38,13 +53,25 @@ class Database:
             cleaned_rows
         )
 
-    # Get all fx rates
-    def get_fx_rates(self):
-        return self.conn.execute("""
-            SELECT *
-            FROM exchange_rates
-            ORDER BY date, base, quote
-        """).fetchall()
+    # Get rates for specific currency comparison and time period
+    def get_cross_rates(
+        self,
+        start_date,
+        end_date,
+        base_currency,
+        quote_currency
+    ):
+        return self.conn.execute(
+            """
+            SELECT date, base_currency, quote_currency, rate
+            FROM fx_cross_rates
+            WHERE date BETWEEN ? AND ?
+            AND base_currency = ?
+            AND quote_currency = ?
+            ORDER BY date
+            """,
+            [start_date, end_date, base_currency, quote_currency]
+        ).fetchall()
 
     def close(self):
             self.conn.close()
