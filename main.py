@@ -1,37 +1,13 @@
-import requests
+from fx_rates_source import FxRatesSource
+from database import Database
 
-TARGET_CURRENCIES = "NOK,SEK,PLN,RON,DKK,CZK"
+db = Database()
 
-ENDPOINT_BASE = "https://api.frankfurter.dev/v2/rates?"
-RATES_ENDPOINT = f"{ENDPOINT_BASE}quotes={TARGET_CURRENCIES}"
+# Get fx rates from frankfurter API and insert them into DB
+def import_fx_rates():
+    source = FxRatesSource()
+    rates = source.get_rates("2026-08-01", "2026-08-31") # I chose to use the month of August 2026
 
-def get_day_rates():
-    try:
-        response = requests.get(RATES_ENDPOINT, timeout=10)
+    db.insert_fx_rates(rates)
+    db.close()
 
-        response.raise_for_status()
-
-        rates = response.json()
-
-        for row in rates:
-            print(row)
-
-    except requests.exceptions.RequestException as e:
-        print(f"Could not reach API: {e}")
-
-def get_rates(start_date):
-    try:
-        response = requests.get(f"{ENDPOINT_BASE}from={start_date}&quotes={TARGET_CURRENCIES}")
-
-        response.raise_for_status()
-
-        rates = response.json()
-
-        for row in rates:
-            print(row)
-
-    except requests.exceptions.RequestException as e:
-            print(f"Could not reach API: {e}")
-
-#get_day_rates()
-get_rates("2026-09-01")
