@@ -19,7 +19,19 @@ def get_day_rates():
     except requests.exceptions.RequestException as e:
         print(f"Could not reach API: {e}")
 
-def get_rates(timeperiod):
-    pass
+def get_rates(start_date):
+    try:
+        response = requests.get(f"{ENDPOINT_BASE}from={start_date}&quotes={TARGET_CURRENCIES}")
 
-get_day_rates()
+        response.raise_for_status()
+
+        rates = response.json()
+
+        for row in rates:
+            print(row)
+
+    except requests.exceptions.RequestException as e:
+            print(f"Could not reach API: {e}")
+
+#get_day_rates()
+get_rates("2026-09-01")
