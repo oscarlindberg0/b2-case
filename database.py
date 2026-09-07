@@ -16,7 +16,7 @@ class Database:
                             PRIMARY KEY (date, base, quote)
                         );""")
 
-            # Create or update cross-rate view
+            # Create cross-rate view
             self.conn.execute("""
                             CREATE OR REPLACE VIEW fx_cross_rates AS
                             SELECT

@@ -1,10 +1,11 @@
 import requests
 
-TARGET_CURRENCIES = "NOK,SEK,PLN,RON,DKK,CZK"
+TARGET_CURRENCIES = "EUR,NOK,SEK,PLN,RON,DKK,CZK"
 ENDPOINT_BASE = "https://api.frankfurter.dev/v2/rates?"
 
 class FxRatesSource:
 
+    # Get fx rates from frankfurter api
     def get_rates(self, start_date, end_date):
         try:
             response = requests.get(f"{ENDPOINT_BASE}from={start_date}&to={end_date}&quotes={TARGET_CURRENCIES}")
