@@ -59,19 +59,23 @@ class Database:
         start_date,
         end_date,
         base_currency,
-        quote_currency
+        quote_currencies
     ):
+        placeholders = ",".join(["?"] * len(quote_currencies))
+
         return self.conn.execute(
-            """
+            f"""
             SELECT date, base_currency, quote_currency, rate
             FROM fx_cross_rates
             WHERE date BETWEEN ? AND ?
             AND base_currency = ?
-            AND quote_currency = ?
-            ORDER BY date
+            AND quote_currency IN ({placeholders})
+            ORDER BY date, quote_currency
             """,
-            [start_date, end_date, base_currency, quote_currency]
+            [
+                start_date,
+                end_date,
+                base_currency,
+                *quote_currencies
+            ]
         ).fetchall()
-
-    def close(self):
-            self.conn.close()

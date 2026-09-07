@@ -1,6 +1,6 @@
 import requests
 
-TARGET_CURRENCIES = "EUR,NOK,SEK,PLN,RON,DKK,CZK"
+TARGET_CURRENCIES = "NOK,EUR,SEK,PLN,RON,DKK,CZK"
 ENDPOINT_BASE = "https://api.frankfurter.dev/v2/rates?"
 
 class FxRatesSource:
@@ -16,4 +16,4 @@ class FxRatesSource:
             return rates
 
         except requests.exceptions.RequestException as e:
-                print(f"Could not reach API: {e}")
+            print(f"Could not reach API: {e}")

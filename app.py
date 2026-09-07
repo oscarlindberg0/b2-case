@@ -10,6 +10,7 @@ db = Database()
 # Get fx rates from frankfurter API and insert them into DB
 # Only has to be called once in order to populate DB, no need to call it at every script execution
 def import_fx_rates():
+
     source = FxRatesSource()
     rates = source.get_rates("2023-01-01", "2026-01-01") # The chosen dataset covers jan 2023 until jan 2026
 
@@ -38,9 +39,10 @@ base_currency = streamlit.selectbox(
     ["EUR","NOK","SEK","PLN","RON","DKK","CZK"]
 )
 
-quote_currency = streamlit.selectbox(
+quote_currencies = streamlit.multiselect(
     "Quote currencies",
-    ["EUR","NOK","SEK","PLN","RON","DKK","CZK"]
+    ["EUR","NOK","SEK","PLN","RON","DKK","CZK"],
+    default=["SEK"]
 )
 
 if streamlit.button("Get FX Rates"):
@@ -49,7 +51,7 @@ if streamlit.button("Get FX Rates"):
         start_date,
         end_date,
         base_currency,
-        quote_currency
+        quote_currencies
     )
 
     df = pd.DataFrame(
@@ -57,12 +59,38 @@ if streamlit.button("Get FX Rates"):
         columns=["date", "base_currency", "quote_currency", "rate"]
     )
 
-    fig = px.line(
-        df,
-        x="date",
-        y="rate",
-        title=f"{base_currency} / {quote_currency}",
-        markers=True
-    )
+    if df.empty:
+        streamlit.warning("No rates found for selected time period")
+    else:
 
-    streamlit.plotly_chart(fig, use_container_width=True)
+        # Create columns for the selected currencies
+        cols = streamlit.columns(len(quote_currencies))
+
+        for col, currency in zip(cols, quote_currencies):
+
+            currency_df = df[df["quote_currency"] == currency]
+
+            if not currency_df.empty:
+                first_rate = currency_df["rate"].iloc[0]
+                last_rate = currency_df["rate"].iloc[-1]
+
+                pct_change = (
+                    (last_rate - first_rate) / first_rate
+                ) * 100
+
+                col.metric(
+                    label=currency,
+                    value=f"{last_rate:.4f}",
+                    delta=f"{pct_change:+.2f}%"
+                )
+
+        # FX rate chart
+        fig = px.line(
+            df,
+            x="date",
+            y="rate",
+            color="quote_currency",
+            markers=True
+        )
+
+        streamlit.plotly_chart(fig, use_container_width=True)
