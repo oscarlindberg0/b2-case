@@ -16,6 +16,8 @@ def import_fx_rates():
 
     db.insert_fx_rates(rates)
 
+#import_fx_rates()  #                   <-------- Uncomment this line if you want to want to test fetching data from the API and inserting into the database
+
 
 #####################################
 #                                   #
