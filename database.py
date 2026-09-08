@@ -53,6 +53,12 @@ class Database:
             cleaned_rows
         )
 
+    # Get the earliest and latest date available in the database
+    def get_date_range(self):
+        return self.conn.execute(
+            "SELECT min(date), max(date) FROM exchange_rates"
+        ).fetchone()
+
     # Get rates for specific currency comparison and time period
     def get_cross_rates(
         self,
@@ -71,6 +77,45 @@ class Database:
             AND base_currency = ?
             AND quote_currency IN ({placeholders})
             ORDER BY date, quote_currency
+            """,
+            [
+                start_date,
+                end_date,
+                base_currency,
+                *quote_currencies
+            ]
+        ).fetchall()
+
+    # Get rates aggregated by month or year for a currency comparison and time period.
+    # period must be "month" or "year"
+    def get_cross_rates_aggregated(
+        self,
+        start_date,
+        end_date,
+        base_currency,
+        quote_currencies,
+        period
+    ):
+        if period not in ("month", "year"):
+            raise ValueError(f"period must be 'month' or 'year', got {period!r}")
+
+        placeholders = ",".join(["?"] * len(quote_currencies))
+
+        return self.conn.execute(
+            f"""
+            SELECT
+                date_trunc('{period}', date) AS date,
+                base_currency,
+                quote_currency,
+                avg(rate) AS rate,
+                min(rate) AS rate_min,
+                max(rate) AS rate_max
+            FROM fx_cross_rates
+            WHERE date BETWEEN ? AND ?
+            AND base_currency = ?
+            AND quote_currency IN ({placeholders})
+            GROUP BY 1, base_currency, quote_currency
+            ORDER BY 1, quote_currency
             """,
             [
                 start_date,

@@ -13,6 +13,9 @@ If I needed additional complexity like multiple concurrent writers for example, 
 Streamlit is fast to build and interactive, which makes it a good option for demoing a project like this one. It is also much more modern looking than other UI options for Python like tkinter for example. It also runs seamlessly against DuckDB without additional complexity required.
 Plotly is a good option for integrating charts and diagrams into the UI.
 
+## Time window
+I loaded three years of daily data, from 2023-01-01 to 2026-01-01. This is long enough to show meaningful monthly and yearly aggregations and to make correlations between currencies statistically meaningful, while staying small enough (roughly 750 trading days x 7 currencies) that the whole pipeline runs in seconds and the resulting database file stays small enough to hand over directly.
+
 ## Schema
 All the fx rates are saved in the database only as EUR-based rates, meaning only one database entry for every currency is stored. Cross-rates (meaning rates that don't include the EUR as base currency, for example a SEK / NOK comparison) are calculated at read time using a preset query in the form of a database view.
 This avoids redundancy and keeps the EUR rate as the single source of truth.

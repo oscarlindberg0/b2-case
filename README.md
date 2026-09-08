@@ -3,13 +3,12 @@
 ## Running the script
 1. Download the files.
 2. Open a terminal window (Windows Powershell for example), and navigate to the "b2-case" folder.
-3. Run the command `streamlit run .\app.py`. (If streamlit is not found, it can be installed with `python -m pip install streamlit`)
+3. Run the command `streamlit run .\app.py`.
 4. A web interface will then start. Here you can play around with different currencies and time periods, and see how the graph changes accordingly.
 
 Note: The database is already properly populated with data from the chosen fx rate API. If you want to test importing the data from scratch you must:
-1. Open app.py and uncomment line 19 (remove the first #).
-2. Delete the fx_rates.db file.
-3. Run the script as described above.
+1. Open a terminal window and navigate to the "b2-case" folder.
+2. Run the command `python .\fetch_and_load.py`
 
 ## Functionality
 * FX data for the desired currencies and time period is fetched from the Frankfurter API.
