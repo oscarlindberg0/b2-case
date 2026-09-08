@@ -30,8 +30,9 @@ class Database:
                             WHERE a.quote <> b.quote;
                         """)
             
-        except duckdb.FatalException as e:
+        except duckdb.Error as e:
             print(f"Could not connect to database: {e}")
+            raise
 
     # Insert a list of fx rate entries into the DB
     def insert_fx_rates(self, rows: list[dict]):
@@ -124,3 +125,6 @@ class Database:
                 *quote_currencies
             ]
         ).fetchall()
+
+    def close(self):
+        self.conn.close()

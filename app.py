@@ -52,8 +52,11 @@ granularity = streamlit.radio(
 
 if streamlit.button("Get FX Rates"):
 
+    # A currency can't have a cross rate against itself, so drop it from the quote selection
+    quote_currencies = [c for c in quote_currencies if c != base_currency]
+
     if not quote_currencies:
-        streamlit.warning("Select at least one quote currency")
+        streamlit.warning("Select at least one quote currency different from the base currency")
 
     else:
         if granularity == "Daily":
